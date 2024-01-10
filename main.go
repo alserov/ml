@@ -1,21 +1,28 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"gorgonia.org/tensor"
+)
 
 func main() {
-	// dot product
-	// works only if len(a) == len(b)
-	a := []float32{1, 2, 3}
-	b := []float32{4, 5, 6}
-	// z = a[0] * b[0] + a[1] * b[1] ... + a[n] * b[n] == dotProduct(a,b)
-	// the same as 'countOutput() (3cecd243387fcb7b06a3c2676ebe6ba72d51314c)' without adding bias
-	fmt.Println(dotProduct(a, b))
-}
+	inputs := tensor.New(tensor.WithBacking([]float32{1, 2, 3, 2.5}))
+	weights := tensor.New(tensor.WithShape(3, 4), tensor.WithBacking([]float32{
+		0.2, 0.8, -0.5, 1,
+		0.5, -0.91, 0.26, -0.5,
+		-0.26, -0.27, 0.17, 0.87,
+	}))
+	biases := tensor.New(tensor.WithBacking([]float32{2, 3, 0.5}))
 
-func dotProduct(a, b []float32) float32 {
-	var res float32
-	for i, v := range a {
-		res += v * b[i]
+	dp, err := tensor.Dot(weights, inputs)
+	if err != nil {
+		panic("failed to find dot product: " + err.Error())
 	}
-	return res
+
+	output, err := tensor.Add(dp, biases)
+	if err != nil {
+		panic("failed to add: " + err.Error())
+	}
+
+	fmt.Println(dp, output)
 }
