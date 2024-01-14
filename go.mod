@@ -2,7 +2,10 @@ module github.com/alserov/ml
 
 go 1.21
 
-require gonum.org/v1/plot v0.10.1
+require (
+	gonum.org/v1/gonum v0.9.3
+	gonum.org/v1/plot v0.10.1
+)
 
 require (
 	git.sr.ht/~sbinet/gg v0.3.1 // indirect
