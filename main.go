@@ -3,6 +3,10 @@ package main
 import (
 	"fmt"
 	"gonum.org/v1/gonum/mat"
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
+	"image/color"
+	"os"
 )
 
 func main() {
@@ -316,6 +320,12 @@ func main() {
 		2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
 		2, 2, 2, 2}
 
+	colors := map[float64]color.Color{
+		0: color.RGBA{B: 255, A: 255},
+		1: color.RGBA{G: 255, A: 255},
+		2: color.RGBA{G: 255, B: 255},
+	}
+
 	// layer 1
 	rawInputs := []float64{
 		1, 2, 3, 2.5,
@@ -360,6 +370,46 @@ func main() {
 	}
 
 	fmt.Println(mat.Formatted(output2, mat.Prefix(""), mat.Squeeze()))
+	plotData(X, Y, colors, "plot.png")
+}
 
-	plotData()
+func plotData(data [][]float64, class []float64, colors map[float64]color.Color, path string) {
+	p := plot.New()
+
+	for k, v := range colors {
+		xys := make(plotter.XYs, 0, len(data))
+		for i := range data {
+			if class[i] == k {
+				xys = append(xys, plotter.XY{
+					X: data[i][0],
+					Y: data[i][1],
+				})
+			}
+		}
+
+		scatter, err := plotter.NewScatter(xys)
+		if err != nil {
+			panic(err)
+		}
+		scatter.Color = v
+		p.Add(scatter)
+	}
+
+	wt, err := p.WriterTo(400, 400, "png")
+	if err != nil {
+		panic("failed to init write to: " + err.Error())
+	}
+
+	f, err := os.Create(path)
+	if err != nil {
+		panic("failed to create file: " + err.Error())
+	}
+	defer func() {
+		err = f.Close()
+		if err != nil {
+			panic("failed to close image: " + err.Error())
+		}
+	}()
+
+	wt.WriteTo(f)
 }
